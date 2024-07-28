@@ -18,7 +18,7 @@ const User = z.object({
 // Address Schema
 const Address = z.object({
   userId: z.string().uuid(),
-  buildingNumber: z.number(),
+  buildingNumber: z.coerce.number(),
   street: z.string(),
   city: z.string(),
 });
@@ -26,15 +26,15 @@ const Address = z.object({
 // OrderItem Schema
 const OrderItem = z.object({
   productId: z.string().uuid(),
-  quantity: z.number().int(),
-  price: z.number(),
+  quantity: z.coerce.number().int(),
+  price: z.coerce.number(),
   orderId: z.string().uuid(),
 });
 
 // Order Schema
 const Order = z.object({
   userId: z.string().uuid(),
-  totalPrice: z.number(),
+  totalPrice: z.coerce.number(),
   items: z.array(OrderItem),
   status: OrderStatus,
   addressId: z.string().uuid(),
@@ -46,7 +46,7 @@ const Order = z.object({
 const Review = z.object({
   title: z.string(),
   content: z.string(),
-  rating: z.number().int(),
+  rating: z.coerce.number().int(),
   userId: z.string().uuid(),
   productId: z.string().uuid(),
 });
@@ -62,6 +62,7 @@ const OptionItem = z.object({
   id: z.string().uuid(),
   value: z.string(),
   label: z.string(),
+  price: z.coerce.number(),
   optionId: z.string().uuid(),
 });
 
@@ -85,8 +86,8 @@ const Tag = z.object({
 const Product = z.object({
   name: z.string(),
   toppings: z.string(),
-  price: z.number(),
-  isAvailable: z.boolean(),
+  basePrice: z.coerce.number(),
+  isAvailable: z.boolean().optional(),
   options: z.array(Option),
   tags: z.array(Tag),
   image: Image,
@@ -99,6 +100,23 @@ const News = z.object({
   content: z.string(),
   image: Image,
   userId: z.string().uuid(),
+});
+
+const FormTagSchema = z.object({
+  name: z.string().min(1, "Nazwa tagu jest wymagana"),
+  textColor: z.string().optional(),
+  bgColor: z.string().optional(),
+});
+
+const FormOptionSchema = z.object({
+  name: z.string().min(1, "Nazwa opcji jest wymagana"),
+  options: z.array(
+    z.object({
+      value: z.string().min(1, "Wartość opcji jest wymagana"),
+      label: z.string().min(1, "Etykieta opcji jest wymagana"),
+      price: z.number().min(0, "Cena musi być nieujemna"),
+    })
+  ),
 });
 
 // Export all schemas
@@ -117,4 +135,6 @@ export const schemas = {
   Role,
   OrderStatus,
   Category,
+  FormOptionSchema,
+  FormTagSchema,
 };

@@ -1,7 +1,10 @@
 import React from "react";
+import Client from "./Client";
+import { getProducts } from "@/actions/productActions";
 
-function Page() {
-  return <div>Menu page</div>;
+async function Page() {
+  const products = await getProducts();
+  return <Client products={products} />;
 }
 
 export default Page;

@@ -5,7 +5,24 @@ import { schemas } from "@/schemas/schemas";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-// Get all products
+// Get all products with dependencies
+export async function getProductsWithChildren() {
+  const products = await prisma.product.findMany({
+    include: {
+      options: true,
+      tags: true,
+      image: true,
+      reviews: {
+        include: {
+          user: true,
+        },
+      },
+    },
+  });
+  revalidatePath("/");
+  return products;
+}
+//Get all products without dependencies
 export async function getProducts() {
   const products = await prisma.product.findMany();
   revalidatePath("/");

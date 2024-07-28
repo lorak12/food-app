@@ -1,3 +1,5 @@
+import { Prisma } from "@prisma/client";
+
 export interface FullProduct {
   id: string;
   name: string;
@@ -40,3 +42,19 @@ export interface FullProduct {
     };
   }[];
 }
+
+const productWithChildren = Prisma.validator<Prisma.ProductDefaultArgs>()({
+  include: {
+    options: true,
+    tags: true,
+    image: true,
+    reviews: {
+      include: {
+        user: true,
+      },
+    },
+  },
+});
+export type ProductWithChildren = Prisma.ProductGetPayload<
+  typeof productWithChildren
+>;

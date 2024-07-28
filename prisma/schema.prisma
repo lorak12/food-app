@@ -12,7 +12,7 @@ model Product {
   id          String  @id @default(uuid())
   name        String
   toppings    String
-  price       Float
+  basePrice   Float
   isAvailable Boolean
 
   options Option[]
@@ -51,6 +51,7 @@ model OptionItem {
   id    String @id @default(uuid())
   value String
   label String
+  price Float
 
   Option   Option @relation(fields: [optionId], references: [id])
   optionId String
