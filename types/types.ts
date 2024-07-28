@@ -4,10 +4,14 @@ export interface FullProduct {
   toppings: string;
   price: number;
   category: "pizza" | "fastFood" | "other";
-  sizes: {
+  options: {
     id: string;
     name: string;
-    value: string;
+    options: {
+      id: string;
+      value: string;
+      label: string;
+    }[];
   }[];
   tags: {
     id: string;
@@ -15,12 +19,10 @@ export interface FullProduct {
     textColor: string;
     bgColor: string;
   }[];
-  images: {
+  image: {
     id: string;
     url: string;
-    isPrimary: boolean;
-    productId: string;
-  }[];
+  };
   reviews: {
     id: string;
     userId: string;

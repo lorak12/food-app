@@ -9,15 +9,16 @@ datasource db {
 }
 
 model Product {
-  id       String @id @default(uuid())
-  name     String
-  toppings String
-  price    Float
+  id          String  @id @default(uuid())
+  name        String
+  toppings    String
+  price       Float
+  isAvailable Boolean
 
-  sizes Size[]
-  tags  Tag[]
+  options Option[]
+  tags    Tag[]
 
-  images  Image[]
+  image   Image    @relation(fields: [imageId], references: [id])
   reviews Review[]
 
   category Category
@@ -26,6 +27,7 @@ model Product {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  imageId   String
 }
 
 model Tag {
@@ -38,20 +40,28 @@ model Tag {
   productId String?
 }
 
-model Size {
-  id      String    @id @default(uuid())
+model Option {
+  id      String       @id @default(uuid())
   name    String
-  value   String
+  options OptionItem[]
   product Product[]
 }
 
-model Image {
-  id        String  @id @default(uuid())
-  url       String
-  isPrimary Boolean
-  productId String
+model OptionItem {
+  id    String @id @default(uuid())
+  value String
+  label String
 
-  product Product @relation(fields: [productId], references: [id])
+  Option   Option @relation(fields: [optionId], references: [id])
+  optionId String
+}
+
+model Image {
+  id  String @id @default(uuid())
+  url String
+
+  Product Product[]
+  News    News[]
 }
 
 model Review {
@@ -69,14 +79,15 @@ model Review {
 }
 
 model News {
-  id       String @id @default(uuid())
-  title    String
-  content  String
-  imageUrl String
-  userId   String
-  user     User   @relation(fields: [userId], references: [id])
+  id      String @id @default(uuid())
+  title   String
+  content String
+  image   Image  @relation(fields: [imageId], references: [id])
+  userId  String
+  user    User   @relation(fields: [userId], references: [id])
 
   publishedAt DateTime @default(now())
+  imageId     String
 }
 
 model Order {
