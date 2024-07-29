@@ -23,25 +23,6 @@ const Address = z.object({
   city: z.string(),
 });
 
-// OrderItem Schema
-const OrderItem = z.object({
-  productId: z.string().uuid(),
-  quantity: z.coerce.number().int(),
-  price: z.coerce.number(),
-  orderId: z.string().uuid(),
-});
-
-// Order Schema
-const Order = z.object({
-  userId: z.string().uuid(),
-  totalPrice: z.coerce.number(),
-  items: z.array(OrderItem),
-  status: OrderStatus,
-  addressId: z.string().uuid(),
-  user: User.optional(),
-  address: Address.optional(),
-});
-
 // Review Schema
 const Review = z.object({
   title: z.string(),
@@ -99,6 +80,27 @@ const News = z.object({
   content: z.string(),
   image: Image,
   userId: z.string().uuid(),
+});
+
+// OrderItem Schema
+const OrderItem = z.object({
+  productId: z.string().uuid(),
+  quantity: z.coerce.number().int(),
+  price: z.coerce.number(),
+  pickedOptions: z.array(OptionItem),
+
+  orderId: z.string().uuid(),
+});
+
+// Order Schema
+const Order = z.object({
+  userId: z.string().uuid(),
+  totalPrice: z.coerce.number(),
+  items: z.array(OrderItem),
+  status: OrderStatus,
+  addressId: z.string().uuid(),
+  user: User.optional(),
+  address: Address.optional(),
 });
 
 const FormTagSchema = z.object({

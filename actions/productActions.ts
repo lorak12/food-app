@@ -9,7 +9,11 @@ import { z } from "zod";
 export async function getProductsWithChildren() {
   const products = await prisma.product.findMany({
     include: {
-      options: true,
+      options: {
+        include: {
+          options: true,
+        },
+      },
       tags: true,
       image: true,
       reviews: {
@@ -29,6 +33,30 @@ export async function getProducts() {
   return products;
 }
 
+// Get all available products
+
+export async function getAvailableProducts() {
+  const products = await prisma.product.findMany({
+    where: { isAvailable: true },
+    include: {
+      options: {
+        include: {
+          options: true,
+        },
+      },
+      tags: true,
+      image: true,
+      reviews: {
+        include: {
+          user: true,
+        },
+      },
+    },
+  });
+  revalidatePath("/");
+  return products;
+}
+
 // Get a single product by ID
 export async function getProduct(id: string) {
   const product = await prisma.product.findUnique({
@@ -43,7 +71,11 @@ export async function getProductWithChildren(id: string) {
   const products = await prisma.product.findUnique({
     where: { id },
     include: {
-      options: true,
+      options: {
+        include: {
+          options: true,
+        },
+      },
       tags: true,
       image: true,
       reviews: {

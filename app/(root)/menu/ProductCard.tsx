@@ -14,24 +14,20 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
-import { FullProduct } from "@/types/types";
+import { ProductWithChildren } from "@/types/types";
 import { formatPrice } from "@/utils/priceFormatter";
 import { ShoppingCart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
-function ProductCard({ data }: { data: FullProduct }) {
-  function getPrimaryImage(images: any) {
-    return images.find((img: any) => img.isPrimary).url;
-  }
+function ProductCard({ data }: { data: ProductWithChildren }) {
   return (
     <Card className="max-w-[300px] max-h-[400px] h-[400px] relative group">
       <Link href={`/menu/${data.id}`}>
         <CardContent className="relative w-[calc(100%-10px)] aspect-square items-center flex justify-center">
           <Image
-            src={getPrimaryImage(data.images)}
+            src={data.image.url}
             alt={data.name}
             fill
             className="object-cover"
@@ -40,10 +36,6 @@ function ProductCard({ data }: { data: FullProduct }) {
         <CardHeader>
           <CardTitle className="flex flex-col gap-1">
             <div className="flex items-center gap-2">
-              {data.name}
-              <Badge>{formatPrice(data.price)}</Badge>{" "}
-            </div>
-            <div className="flex items-center gap-2">
               {data.tags.map((tag) => (
                 <Badge
                   style={{ backgroundColor: tag.bgColor, color: tag.textColor }}
@@ -51,6 +43,10 @@ function ProductCard({ data }: { data: FullProduct }) {
                   {tag.name}
                 </Badge>
               ))}
+            </div>
+            <div className="flex items-center gap-2">
+              {data.name}
+              <Badge>{formatPrice(data.basePrice)}</Badge>{" "}
             </div>
           </CardTitle>
           <CardDescription className="text-ellipsis truncate line-clamp-2 text-wrap">

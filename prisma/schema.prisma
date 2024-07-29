@@ -54,6 +54,9 @@ model OptionItem {
 
   Option   Option @relation(fields: [optionId], references: [id])
   optionId String
+
+  OrderItem   OrderItem? @relation(fields: [orderItemId], references: [id])
+  orderItemId String?
 }
 
 model Image {
@@ -103,10 +106,11 @@ model Order {
 }
 
 model OrderItem {
-  id        String @id @default(uuid())
-  productId String
-  quantity  Int
-  price     Float
+  id            String       @id @default(uuid())
+  productId     String
+  quantity      Int
+  price         Float
+  pickedOptions OptionItem[]
 
   order   Order  @relation(fields: [orderId], references: [id])
   orderId String

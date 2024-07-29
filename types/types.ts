@@ -45,7 +45,11 @@ export interface FullProduct {
 
 const productWithChildren = Prisma.validator<Prisma.ProductDefaultArgs>()({
   include: {
-    options: true,
+    options: {
+      include: {
+        options: true,
+      },
+    },
     tags: true,
     image: true,
     reviews: {

@@ -1,9 +1,19 @@
 import React from "react";
-import { products } from "../page";
 import Client from "./Client";
+import { getProductWithChildren } from "@/actions/productActions";
 
-function Page() {
-  return <Client product={products[0]} />;
+async function Page({
+  params: { productId },
+}: {
+  params: { productId: string };
+}) {
+  const product = await getProductWithChildren(productId);
+
+  if (!product) {
+    return <h1>Product not found</h1>;
+  }
+
+  return <Client product={product} />;
 }
 
 export default Page;
