@@ -58,3 +58,13 @@ const productWithChildren = Prisma.validator<Prisma.ProductDefaultArgs>()({
 export type ProductWithChildren = Prisma.ProductGetPayload<
   typeof productWithChildren
 >;
+
+const optionWithChildren = Prisma.validator<Prisma.OptionDefaultArgs>()({
+  include: {
+    options: true,
+  },
+});
+
+export type OptionWithChildren = Prisma.OptionGetPayload<
+  typeof optionWithChildren
+>;
