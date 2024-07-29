@@ -1,16 +1,16 @@
-import { getCategories } from "@/actions/categoryActions";
 import Client from "./Client";
-import { getProduct } from "@/actions/productActions";
+import { getProductWithChildren } from "@/actions/productActions";
 
 async function Page({
   params: { productId },
 }: {
   params: { productId: string };
 }) {
-  const product = await getProduct(productId);
-  const categories = await getCategories();
-  // @ts-ignore
-  return <Client product={product} categories={categories} />;
+  const product = await getProductWithChildren(productId);
+  if (!product) {
+    return <h1>Product not found</h1>;
+  }
+  return <Client product={product} />;
 }
 
 export default Page;

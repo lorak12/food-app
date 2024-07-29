@@ -36,8 +36,7 @@ model Tag {
   textColor String
   bgColor   String
 
-  Product   Product? @relation(fields: [productId], references: [id])
-  productId String?
+  product Product[]
 }
 
 model Option {

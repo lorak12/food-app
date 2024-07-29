@@ -62,6 +62,15 @@ import { Option, Tag } from "@prisma/client";
 import { Badge } from "@/components/ui/badge";
 import { createTag } from "@/actions/tagsActions";
 import { createOption } from "@/actions/optionsActions";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import Image from "next/image";
+import { formatPrice } from "@/utils/priceFormatter";
 
 export default function ProductForm({
   initialOptions,
@@ -76,12 +85,14 @@ export default function ProductForm({
   const [allTags, setAllTags] = useState<Tag[]>(initialTags);
   const [allOptions, setAllOptions] = useState<Option[]>(initialOptions);
 
-  const form = useForm<z.infer<typeof schemas.Product>>({
-    resolver: zodResolver(schemas.Product),
+  const form = useForm<z.infer<typeof schemas.FormProductSchema>>({
+    resolver: zodResolver(schemas.FormProductSchema),
     defaultValues: {
       options: [],
       tags: [],
+      image: { url: "/pizza.png" },
     },
+    mode: "onTouched",
   });
 
   const tagForm = useForm<z.infer<typeof schemas.FormTagSchema>>({
@@ -124,10 +135,9 @@ export default function ProductForm({
     name: "options",
   });
 
-  async function onSubmit(data: z.infer<typeof schemas.Product>) {
+  async function onSubmit(data: z.infer<typeof schemas.FormProductSchema>) {
     try {
-      // await createProduct(data);
-      console.log(data, "Product created successfully!");
+      await createProduct(data);
       toast({
         title: "Produkt został stworzony",
         action: <CircleCheck className="w-4 h-4 text-green-500" />,
@@ -490,11 +500,13 @@ export default function ProductForm({
                             !optionFields.length && "text-muted-foreground"
                           )}
                         >
-                          {optionFields.length
-                            ? optionFields.map((option) => (
-                                <span key={option.id}>{option.name}</span>
-                              ))
-                            : "Wybierz opcje"}
+                          <div className="flex gap-2">
+                            {optionFields.length
+                              ? optionFields.map((option) => (
+                                  <span key={option.id}>{option.name}</span>
+                                ))
+                              : "Wybierz opcje"}
+                          </div>
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </FormControl>
@@ -676,7 +688,56 @@ export default function ProductForm({
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="image.url"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Zdjęcie</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
+          <Card className="max-w-[300px]  h-fit relative group">
+            <CardContent className="relative w-[calc(100%-10px)] aspect-square items-center flex justify-center">
+              <Image
+                src="/pizza.png"
+                alt={"preview"}
+                fill
+                className="object-cover"
+              />
+            </CardContent>
+            <CardHeader>
+              <CardTitle className="flex flex-col gap-1">
+                <div className="flex items-center gap-2">
+                  {form.getValues("name") ?? "..."}
+                  <Badge>
+                    {formatPrice(form.getValues("basePrice") ?? 0)}
+                  </Badge>{" "}
+                </div>
+                <div className="flex items-center gap-2">
+                  {form.getValues("tags").map((tag) => (
+                    <Badge
+                      key={tag.id}
+                      style={{
+                        backgroundColor: tag.bgColor,
+                        color: tag.textColor,
+                      }}
+                    >
+                      {tag.name}
+                    </Badge>
+                  ))}
+                </div>
+              </CardTitle>
+              <CardDescription className="text-ellipsis truncate line-clamp-2 text-wrap">
+                Składniki: {form.getValues("toppings")}
+              </CardDescription>
+            </CardHeader>
+          </Card>
         </div>
         <Button type="submit">
           <Send className="mr-2 h-4 w-4" />

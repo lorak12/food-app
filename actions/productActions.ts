@@ -38,39 +38,53 @@ export async function getProduct(id: string) {
   return product;
 }
 
+// Get single product with dependencies
+export async function getProductWithChildren(id: string) {
+  const products = await prisma.product.findUnique({
+    where: { id },
+    include: {
+      options: true,
+      tags: true,
+      image: true,
+      reviews: {
+        include: {
+          user: true,
+        },
+      },
+    },
+  });
+  revalidatePath("/");
+  return products;
+}
+
 // Create a new product
 export async function createProduct(data: z.infer<typeof schemas.Product>) {
-  const parsedData = schemas.Product.parse(data);
+  const parsedData = schemas.FormProductSchema.parse(data);
 
   const newProduct = await prisma.product.create({
     data: {
       name: parsedData.name,
       toppings: parsedData.toppings,
-      price: parsedData.price,
+      basePrice: parsedData.basePrice,
       category: parsedData.category,
-      isAvailable: parsedData.isAvailable,
+      isAvailable: parsedData.isAvailable ?? false,
       options: {
-        create: parsedData.options.map((option) => ({
-          id: option.id,
-          name: option.name,
-          options: {
-            create: option.options.map((optionItem) => ({
-              id: optionItem.id,
-              value: optionItem.value,
-              label: optionItem.label,
-              optionId: optionItem.optionId,
-            })),
-          },
-        })),
+        connect: [
+          ...parsedData.options.map((option) => {
+            return {
+              id: option.id,
+            };
+          }),
+        ],
       },
       tags: {
-        create: parsedData.tags.map((tag) => ({
-          id: tag.id,
-          name: tag.name,
-          textColor: tag.textColor,
-          bgColor: tag.bgColor,
-          productId: tag.productId,
-        })),
+        connect: [
+          ...parsedData.tags.map((tag) => {
+            return {
+              id: tag.id,
+            };
+          }),
+        ],
       },
       image: {
         create: {
@@ -96,62 +110,29 @@ export async function updateProduct(
     data: {
       name: parsedData.name,
       toppings: parsedData.toppings,
-      price: parsedData.price,
+      basePrice: parsedData.basePrice,
       category: parsedData.category,
       isAvailable: parsedData.isAvailable,
+
       options: {
-        upsert: parsedData.options.map((option) => ({
-          where: { id: option.id },
-          update: {
-            name: option.name,
-            options: {
-              upsert: option.options.map((optionItem) => ({
-                where: { id: optionItem.id },
-                update: {
-                  value: optionItem.value,
-                  label: optionItem.label,
-                  optionId: optionItem.optionId,
-                },
-                create: {
-                  id: optionItem.id,
-                  value: optionItem.value,
-                  label: optionItem.label,
-                  optionId: optionItem.optionId,
-                },
-              })),
-            },
-          },
-          create: {
-            id: option.id,
-            name: option.name,
-            options: {
-              create: option.options.map((optionItem) => ({
-                id: optionItem.id,
-                value: optionItem.value,
-                label: optionItem.label,
-                optionId: optionItem.optionId,
-              })),
-            },
-          },
-        })),
+        set: [],
+        connect: [
+          ...parsedData.options.map((option) => {
+            return {
+              id: option.id,
+            };
+          }),
+        ],
       },
       tags: {
-        upsert: parsedData.tags.map((tag) => ({
-          where: { id: tag.id },
-          update: {
-            name: tag.name,
-            textColor: tag.textColor,
-            bgColor: tag.bgColor,
-            productId: tag.productId,
-          },
-          create: {
-            id: tag.id,
-            name: tag.name,
-            textColor: tag.textColor,
-            bgColor: tag.bgColor,
-            productId: tag.productId,
-          },
-        })),
+        set: [],
+        connect: [
+          ...parsedData.tags.map((tag) => {
+            return {
+              id: tag.id,
+            };
+          }),
+        ],
       },
       image: {
         upsert: {

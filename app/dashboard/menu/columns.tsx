@@ -48,12 +48,12 @@ export const columns: ColumnDef<Product>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "price",
+    accessorKey: "basePrice",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Cena" />
     ),
     cell: ({ row }) => {
-      const price = parseFloat(row.getValue("price"));
+      const price = parseFloat(row.getValue("basePrice"));
       const formatted = new Intl.NumberFormat("pl-PL", {
         style: "currency",
         currency: "PLN",

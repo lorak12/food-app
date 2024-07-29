@@ -53,8 +53,8 @@ const Review = z.object({
 
 // Image Schema
 const Image = z.object({
-  id: z.string().uuid(),
-  url: z.string().url(),
+  id: z.string().uuid().optional(),
+  url: z.string(),
 });
 
 // OptionItem Schema
@@ -79,7 +79,6 @@ const Tag = z.object({
   name: z.string(),
   textColor: z.string(),
   bgColor: z.string(),
-  productId: z.string().uuid().optional(),
 });
 
 // Product Schema
@@ -119,6 +118,17 @@ const FormOptionSchema = z.object({
   ),
 });
 
+const FormProductSchema = z.object({
+  name: z.string(),
+  toppings: z.string(),
+  basePrice: z.coerce.number(),
+  isAvailable: z.boolean().optional(),
+  options: z.array(Option),
+  tags: z.array(Tag),
+  category: Category,
+  image: Image,
+});
+
 // Export all schemas
 export const schemas = {
   User,
@@ -137,4 +147,5 @@ export const schemas = {
   Category,
   FormOptionSchema,
   FormTagSchema,
+  FormProductSchema,
 };

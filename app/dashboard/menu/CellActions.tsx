@@ -1,7 +1,6 @@
 import {
   CircleCheck,
   Clipboard,
-  Edit,
   Eye,
   MoreHorizontal,
   Trash,
@@ -28,12 +27,12 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Row } from "@tanstack/react-table";
-import { Product } from "./columns";
 import Link from "next/link";
 import { deleteProduct } from "@/actions/productActions";
 import { toast } from "@/components/ui/use-toast";
+import { ProductWithChildren } from "@/types/types";
 
-function CellActions({ row }: { row: Row<Product> }) {
+function CellActions({ row }: { row: Row<ProductWithChildren> }) {
   const product = row;
   return (
     <DropdownMenu>
@@ -55,7 +54,7 @@ function CellActions({ row }: { row: Row<Product> }) {
         <DropdownMenuSeparator />
         <DropdownMenuItem>
           <Link
-            href={`/dashboard/products/${product.original.id}/view`}
+            href={`/dashboard/menu/${product.original.id}/view`}
             className="gap-2 flex items-center"
           >
             <Eye className="w-4 h-4" />

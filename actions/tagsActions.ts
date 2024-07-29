@@ -21,15 +21,6 @@ export async function getTag(id: string) {
   return tag;
 }
 
-// Get all tags by productId
-export async function getTagsByProductId(productId: string) {
-  const tags = await prisma.tag.findMany({
-    where: { productId },
-  });
-  revalidatePath("/");
-  return tags;
-}
-
 // Create a new tag
 export async function createTag(data: z.infer<typeof schemas.FormTagSchema>) {
   const parsedData = schemas.FormTagSchema.parse(data);
