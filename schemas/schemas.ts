@@ -6,14 +6,6 @@ const OrderStatus = z.enum(["pending", "delivered", "cancelled"]);
 const Category = z.enum(["pizza", "fastFood", "other"]);
 
 // User Schema
-const User = z.object({
-  email: z.string().email(),
-  firstName: z.string().optional(),
-  lastName: z.string().optional(),
-  imageUrl: z.string().url().optional(),
-  clerkUserId: z.string(),
-  role: Role,
-});
 
 // Address Schema
 const Address = z.object({
@@ -88,8 +80,18 @@ const OrderItem = z.object({
   quantity: z.coerce.number().int(),
   price: z.coerce.number(),
   pickedOptions: z.array(OptionItem),
+  userId: z.string(),
 
-  orderId: z.string().uuid(),
+  orderId: z.string().uuid().optional(),
+});
+
+const User = z.object({
+  email: z.string().email(),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  imageUrl: z.string().url().optional(),
+  clerkUserId: z.string(),
+  role: Role,
 });
 
 // Order Schema
@@ -131,6 +133,12 @@ const FormProductSchema = z.object({
   image: Image,
 });
 
+const FormOrderItemSchema = z.object({
+  quantity: z.coerce.number().int(),
+  price: z.coerce.number(),
+  pickedOptions: z.array(OptionItem),
+});
+
 // Export all schemas
 export const schemas = {
   User,
@@ -150,4 +158,5 @@ export const schemas = {
   FormOptionSchema,
   FormTagSchema,
   FormProductSchema,
+  FormOrderItemSchema,
 };

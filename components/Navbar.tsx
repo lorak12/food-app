@@ -20,7 +20,7 @@ import {
 import { LuMenu } from "react-icons/lu";
 import { ThemeSwitcher } from "./ThemeSwitcher";
 import { UserButton, useUser } from "@clerk/nextjs";
-import { ClipboardList, Layout, Phone } from "lucide-react";
+import { ClipboardList, Layout, Phone, ShoppingCart } from "lucide-react";
 
 export function Navbar() {
   const { user } = useUser();
@@ -53,6 +53,14 @@ export function Navbar() {
                 <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                   <Phone className="w-4 h-4 mr-2" />
                   Kontakt
+                </NavigationMenuLink>
+              </Link>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <Link href="/cart" legacyBehavior passHref>
+                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                  <ShoppingCart className="w-4 h-4 mr-2" />
+                  Koszyk
                 </NavigationMenuLink>
               </Link>
             </NavigationMenuItem>

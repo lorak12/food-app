@@ -13,7 +13,14 @@ import { formatPrice } from "@/utils/priceFormatter";
 import { ProductWithChildren } from "@/types/types";
 import { format } from "date-fns";
 import { pl } from "date-fns/locale";
-import { Minus, Plus, ShoppingCart, Star } from "lucide-react";
+import {
+  CircleCheck,
+  CircleX,
+  Minus,
+  Plus,
+  ShoppingCart,
+  Star,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -29,12 +36,17 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { schemas } from "@/schemas/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
+import { toast } from "@/components/ui/use-toast";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { createOrderItem } from "@/actions/orderActions";
 
 interface OptionItem {
   id: string;
@@ -45,8 +57,12 @@ interface OptionItem {
 }
 
 function Client({ product }: { product: ProductWithChildren }) {
-  const form = useForm<z.infer<typeof schemas.OrderItem>>({
-    resolver: zodResolver(schemas.OrderItem),
+  const router = useRouter();
+
+  const [totalPrice, setTotalPrice] = useState<number>(product.basePrice);
+
+  const form = useForm<z.infer<typeof schemas.FormOrderItemSchema>>({
+    resolver: zodResolver(schemas.FormOrderItemSchema),
     defaultValues: {
       quantity: 1,
       price: product.basePrice,
@@ -67,8 +83,24 @@ function Client({ product }: { product: ProductWithChildren }) {
     name: "pickedOptions",
   });
 
-  async function onSubmit(data: z.infer<typeof schemas.OrderItem>) {
-    console.log(data);
+  async function onSubmit(data: z.infer<typeof schemas.FormOrderItemSchema>) {
+    try {
+      await createOrderItem(data, product.id);
+      toast({
+        title: "Produkt został dodany do koszyka",
+        action: <CircleCheck className="w-4 h-4 text-green-500" />,
+      });
+      router.push("/menu");
+      router.refresh();
+    } catch (error: any) {
+      toast({
+        title: "Coś poszło nie tak",
+        variant: "destructive",
+        action: <CircleX className="w-4 h-4 text-white" />,
+      });
+      console.error(error);
+      throw new Error(error);
+    }
   }
 
   const handleOptionChange = (optionId: string, optionItem: OptionItem) => {
@@ -92,7 +124,10 @@ function Client({ product }: { product: ProductWithChildren }) {
       (total, option) => total + option.price,
       0
     );
-    return optionsPrice + product.basePrice;
+    const totalPrice =
+      (optionsPrice + product.basePrice) * form.getValues("quantity");
+    form.setValue("price", totalPrice);
+    return totalPrice;
   }
 
   return (
@@ -149,10 +184,15 @@ function Client({ product }: { product: ProductWithChildren }) {
                           <Button
                             size="icon"
                             variant="secondary"
+                            type="button"
                             onClick={() => {
                               form.setValue(
                                 "quantity",
                                 Math.max(1, form.getValues("quantity") - 1)
+                              );
+                              setTotalPrice(
+                                (prevState) =>
+                                  prevState / (form.getValues("quantity") + 1)
                               );
                             }}
                           >
@@ -166,17 +206,23 @@ function Client({ product }: { product: ProductWithChildren }) {
                           <Button
                             size="icon"
                             variant="secondary"
-                            onClick={() =>
+                            type="button"
+                            onClick={() => {
                               form.setValue(
                                 "quantity",
                                 form.getValues("quantity") + 1
-                              )
-                            }
+                              );
+                              setTotalPrice(
+                                (prevState) =>
+                                  prevState * form.getValues("quantity")
+                              );
+                            }}
                           >
                             <Plus className="w-4 h-4" />
                           </Button>
                         </div>
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -217,6 +263,7 @@ function Client({ product }: { product: ProductWithChildren }) {
                           </FormControl>
                         </div>
                       ))}
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -233,14 +280,24 @@ function Client({ product }: { product: ProductWithChildren }) {
                       <TableCell colSpan={2} className="w-[150px]">
                         {product.name}
                       </TableCell>
-                      <TableCell>{formatPrice(product.basePrice)}</TableCell>
+                      <TableCell>
+                        {formatPrice(product.basePrice)}
+                        {form.getValues("quantity") > 1
+                          ? ` x${form.getValues("quantity")}`
+                          : null}
+                      </TableCell>
                     </TableRow>
-                    {fields.map((field, index) => (
+                    {fields.map((field) => (
                       <TableRow key={field.id}>
                         <TableCell colSpan={2} className="w-[150px]">
                           {field.label}
                         </TableCell>
-                        <TableCell>+{formatPrice(field.price)}</TableCell>
+                        <TableCell>
+                          +{formatPrice(field.price)}
+                          {form.getValues("quantity") > 1
+                            ? ` x${form.getValues("quantity")}`
+                            : null}
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -263,7 +320,7 @@ function Client({ product }: { product: ProductWithChildren }) {
                 </Table>
               </CardContent>
               <CardFooter className="absolute bottom-0 left-[50%] translate-x-[-50%]">
-                <Button className="w-fit" type="submit">
+                <Button type="submit">
                   Dodaj do koszyka <ShoppingCart className="w-4 h-4 ml-2" />
                 </Button>
               </CardFooter>

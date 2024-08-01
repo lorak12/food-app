@@ -1,0 +1,141 @@
+"use server";
+import prisma from "@/lib/prisma";
+import { schemas } from "@/schemas/schemas";
+import { auth } from "@clerk/nextjs/server";
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
+
+export async function createOrderItem(
+  data: z.infer<typeof schemas.FormOrderItemSchema>,
+  productId: string
+) {
+  const { userId } = auth();
+  if (!userId) {
+    throw new Error("User must be authenticated to create an order item");
+  }
+
+  const parsedData = schemas.FormOrderItemSchema.parse(data);
+
+  const newOrderItem = await prisma.orderItem.create({
+    data: {
+      productId: productId,
+      quantity: parsedData.quantity,
+      price: parsedData.price,
+      userId: userId,
+      pickedOptions: {
+        create: parsedData.pickedOptions.map((option) => ({
+          optionId: option.optionId,
+          value: option.value,
+          label: option.label,
+          price: option.price,
+        })),
+      },
+    },
+  });
+  revalidatePath("/");
+  return newOrderItem;
+}
+
+export async function updateOrderItem(
+  orderItemId: string,
+  data: z.infer<typeof schemas.OrderItem>
+) {
+  const { userId } = auth();
+  if (!userId) {
+    throw new Error("User must be authenticated to create an order item");
+  }
+
+  const parsedData = schemas.OrderItem.parse(data);
+  const orderItem = await prisma.orderItem.update({
+    where: { id: orderItemId },
+    data: {
+      quantity: parsedData.quantity,
+      price: parsedData.price,
+      pickedOptions: {
+        updateMany: parsedData.pickedOptions.map((option) => ({
+          where: { id: option.id },
+          data: {
+            value: option.value,
+            label: option.label,
+            price: option.price,
+          },
+        })),
+      },
+      userId: parsedData.userId,
+      productId: parsedData.productId,
+      orderId: parsedData.orderId,
+    },
+  });
+  revalidatePath(`/`);
+  return orderItem;
+}
+
+export async function deleteOrderItem(orderItemId: string) {
+  const { userId } = auth();
+  if (!userId) {
+    throw new Error("User must be authenticated to create an order item");
+  }
+
+  const deletedOrderItem = await prisma.orderItem.delete({
+    where: { id: orderItemId },
+  });
+  revalidatePath(`/`);
+  return deletedOrderItem;
+}
+
+// Get all order items by order ID
+
+export async function getOrderItemsByOrderId(orderId: string) {
+  const { userId } = auth();
+  if (!userId) {
+    throw new Error("User must be authenticated to create an order item");
+  }
+
+  const orderItems = await prisma.orderItem.findMany({
+    where: { orderId },
+    include: {
+      pickedOptions: true,
+      product: true,
+    },
+  });
+  revalidatePath(`/`);
+  return orderItems;
+}
+
+// Get order items by user ID
+
+export async function getOrderItemsByUserId(userId: string) {
+  const { userId: uId } = auth();
+  if (!uId) {
+    throw new Error("User must be authenticated to create an order item");
+  }
+
+  const orderItems = await prisma.orderItem.findMany({
+    where: { userId },
+    include: {
+      pickedOptions: true,
+      product: true,
+    },
+  });
+  revalidatePath(`/`);
+  return orderItems;
+}
+
+// Get order items by product ID
+
+export async function getOrderItemsByProductId(productId: string) {
+  const { userId } = auth();
+  if (!userId) {
+    throw new Error("User must be authenticated to create an order item");
+  }
+
+  const orderItems = await prisma.orderItem.findMany({
+    where: { productId },
+    include: {
+      pickedOptions: true,
+      product: true,
+    },
+  });
+  revalidatePath(`/`);
+  return orderItems;
+}
