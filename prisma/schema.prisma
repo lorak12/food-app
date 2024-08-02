@@ -55,8 +55,7 @@ model OptionItem {
   Option   Option @relation(fields: [optionId], references: [id])
   optionId String
 
-  OrderItem   OrderItem? @relation(fields: [orderItemId], references: [id])
-  orderItemId String?
+  OrderItem OrderItem[]
 }
 
 model Image {

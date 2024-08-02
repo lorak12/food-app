@@ -72,3 +72,19 @@ const optionWithChildren = Prisma.validator<Prisma.OptionDefaultArgs>()({
 export type OptionWithChildren = Prisma.OptionGetPayload<
   typeof optionWithChildren
 >;
+
+const orderItemWithChildren = Prisma.validator<Prisma.OrderItemDefaultArgs>()({
+  include: {
+    pickedOptions: true,
+    product: {
+      include: {
+        options: true,
+      },
+    },
+    order: true,
+  },
+});
+
+export type OrderItemWithChildren = Prisma.OrderItemGetPayload<
+  typeof orderItemWithChildren
+>;

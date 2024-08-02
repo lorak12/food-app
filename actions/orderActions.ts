@@ -13,6 +13,12 @@ export async function createOrderItem(
   if (!userId) {
     throw new Error("User must be authenticated to create an order item");
   }
+  const user = await prisma.user.findUnique({
+    where: { clerkUserId: userId },
+  });
+  if (!user) {
+    throw new Error("User not found");
+  }
 
   const parsedData = schemas.FormOrderItemSchema.parse(data);
 
@@ -21,15 +27,19 @@ export async function createOrderItem(
       productId: productId,
       quantity: parsedData.quantity,
       price: parsedData.price,
-      userId: userId,
+      userId: user.id,
       pickedOptions: {
-        create: parsedData.pickedOptions.map((option) => ({
-          optionId: option.optionId,
-          value: option.value,
-          label: option.label,
-          price: option.price,
-        })),
+        connect: [
+          ...parsedData.pickedOptions.map((option) => {
+            return {
+              id: option.id,
+            };
+          }),
+        ],
       },
+    },
+    include: {
+      pickedOptions: true,
     },
   });
   revalidatePath("/");
@@ -110,11 +120,24 @@ export async function getOrderItemsByUserId(userId: string) {
     throw new Error("User must be authenticated to create an order item");
   }
 
+  const user = await prisma.user.findUnique({
+    where: { clerkUserId: userId },
+  });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
   const orderItems = await prisma.orderItem.findMany({
-    where: { userId },
+    where: { userId: user.id },
     include: {
       pickedOptions: true,
-      product: true,
+      product: {
+        include: {
+          options: true,
+        },
+      },
+      order: true,
     },
   });
   revalidatePath(`/`);

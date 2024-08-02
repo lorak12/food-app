@@ -10,7 +10,7 @@ async function Page() {
   }
   const orderItems = await getOrderItemsByUserId(userId);
 
-  return <CartClient />;
+  return <CartClient orderItems={orderItems} />;
 }
 
 export default Page;
