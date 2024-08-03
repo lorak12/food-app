@@ -126,11 +126,17 @@ model OrderItem {
 }
 
 model Address {
-  id             String @id @default(uuid())
-  userId         String
-  buildingNumber Int
-  street         String
-  city           String
+  id     String @id @default(uuid())
+  userId String
+
+  name            String
+  phoneNumber     String
+  houseNumber     Int
+  apartmentNumber Int?
+  floorNumber     Int?
+  street          String
+  city            String
+  zipCode         String
 
   user  User    @relation(fields: [userId], references: [id])
   Order Order[]
@@ -164,6 +170,7 @@ enum OrderStatus {
   pending
   delivered
   cancelled
+  notPayed
 }
 
 enum Category {

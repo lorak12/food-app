@@ -21,11 +21,15 @@ import {
 import { toast } from "@/components/ui/use-toast";
 import { OrderItemWithChildren } from "@/types/types";
 import { formatPrice } from "@/utils/priceFormatter";
-import { CircleX } from "lucide-react";
+import { CirclePlus, CircleX, Truck } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React from "react";
 
 function CartClient({ orderItems }: { orderItems: OrderItemWithChildren[] }) {
+  const router = useRouter();
+
   function calculateTotalPrice() {
     return orderItems.reduce((total, item) => total + item.price, 0);
   }
@@ -47,53 +51,71 @@ function CartClient({ orderItems }: { orderItems: OrderItemWithChildren[] }) {
         </div>
         <Card>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Produkt</TableHead>
-                  <TableHead>Cena</TableHead>
-                  <TableHead>Ilość</TableHead>
-                  <TableHead>Cena całkowita</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {orderItems.map((item) => (
+            {orderItems.length > 0 ? (
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell className="grid grid-cols-3 gap-4 max-w-[400px]">
-                      <Image
-                        src="/pizza.png"
-                        alt="pizza"
-                        width="100"
-                        height="100"
-                      />
-                      <div className="col-span-2 flex flex-col justify-center">
-                        <span className="text-muted-foreground uppercase">
-                          {item.product.category}
-                        </span>
-                        <p className="font-semibold text-2xl">
-                          {item.product.name}
-                        </p>
-                        {item.pickedOptions.map((option) => (
-                          <p className="text-muted-foreground">
-                            {
-                              item.product.options.find(
-                                (x) => x.id == option.optionId
-                              )?.name
-                            }
-                            : {option.label}
-                          </p>
-                        ))}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {formatPrice(item.price / item.quantity)}
-                    </TableCell>
-                    <TableCell>{item.quantity}</TableCell>
-                    <TableCell>{formatPrice(item.price)}</TableCell>
+                    <TableHead>Produkt</TableHead>
+                    <TableHead>Cena</TableHead>
+                    <TableHead>Ilość</TableHead>
+                    <TableHead>Cena całkowita</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {orderItems.map((item) => (
+                    <TableRow>
+                      <TableCell className="grid grid-cols-3 gap-4 max-w-[400px]">
+                        <Image
+                          src="/pizza.png"
+                          alt="pizza"
+                          width="100"
+                          height="100"
+                        />
+                        <div className="col-span-2 flex flex-col justify-center">
+                          <span className="text-muted-foreground uppercase">
+                            {item.product.category}
+                          </span>
+                          <p className="font-semibold text-2xl">
+                            {item.product.name}
+                          </p>
+                          {item.pickedOptions.map((option) => (
+                            <p className="text-muted-foreground">
+                              {
+                                item.product.options.find(
+                                  (x) => x.id == option.optionId
+                                )?.name
+                              }
+                              : {option.label}
+                            </p>
+                          ))}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {formatPrice(item.price / item.quantity)}
+                      </TableCell>
+                      <TableCell>{item.quantity}</TableCell>
+                      <TableCell>{formatPrice(item.price)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <div className="flex items-center justify-center h-[500px] flex-col gap-4">
+                <Image
+                  src="/empty-cart.svg"
+                  alt="Empty Cart"
+                  width="300"
+                  height="200"
+                />
+                <h3 className="text-2xl font-semibold tracking-tighter">
+                  Nie masz niczego w koszyku
+                </h3>
+                <Button onClick={() => router.push("/menu")}>
+                  Dodaj swój pierwszy produkt{" "}
+                  <CirclePlus className="ml-2 w-4 h-4" />
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -103,6 +125,8 @@ function CartClient({ orderItems }: { orderItems: OrderItemWithChildren[] }) {
             <CardTitle>Kod zniżkowy</CardTitle>
             <Input placeholder="Kod" />
             <Button
+              size="lg"
+              disabled={orderItems.length > 0 ? false : true}
               onClick={() => {
                 toast({
                   title: "Kod nieprawidłowy",
@@ -124,7 +148,7 @@ function CartClient({ orderItems }: { orderItems: OrderItemWithChildren[] }) {
             w koszyku
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-6">
           <Table>
             <TableBody>
               <TableRow>
@@ -163,6 +187,15 @@ function CartClient({ orderItems }: { orderItems: OrderItemWithChildren[] }) {
               </TableRow>
             </TableFooter>
           </Table>
+          <Button
+            className="w-full"
+            size="lg"
+            disabled={orderItems.length > 0 ? false : true}
+          >
+            <Link href="/cart/delivery" className="flex items-center">
+              Przejdz do dostawy <Truck className="ml-2 w-4 h-4" />
+            </Link>
+          </Button>
         </CardContent>
       </Card>
     </div>

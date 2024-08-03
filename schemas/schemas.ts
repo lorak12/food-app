@@ -2,17 +2,19 @@ import { z } from "zod";
 
 // Enums
 const Role = z.enum(["admin", "user"]);
-const OrderStatus = z.enum(["pending", "delivered", "cancelled"]);
+const OrderStatus = z.enum(["pending", "delivered", "cancelled", "notPayed"]);
 const Category = z.enum(["pizza", "fastFood", "other"]);
-
-// User Schema
 
 // Address Schema
 const Address = z.object({
-  userId: z.string().uuid(),
-  buildingNumber: z.coerce.number(),
-  street: z.string(),
-  city: z.string(),
+  name: z.string().min(1),
+  phoneNumber: z.string().min(1),
+  houseNumber: z.coerce.number().min(1),
+  apartmentNumber: z.coerce.number().min(1).optional(),
+  floorNumber: z.coerce.number().min(1).optional(),
+  street: z.string().min(1),
+  city: z.string().min(1),
+  zipCode: z.string().min(1).max(6),
 });
 
 // Review Schema
@@ -96,13 +98,7 @@ const User = z.object({
 
 // Order Schema
 const Order = z.object({
-  userId: z.string().uuid(),
-  totalPrice: z.coerce.number(),
-  items: z.array(OrderItem),
-  status: OrderStatus,
-  addressId: z.string().uuid(),
-  user: User.optional(),
-  address: Address.optional(),
+  addressId: z.string().uuid({ message: "Wybierz jedną z opcji" }),
 });
 
 const FormTagSchema = z.object({

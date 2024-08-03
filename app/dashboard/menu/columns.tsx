@@ -7,9 +7,9 @@ import { format } from "date-fns";
 import { pl } from "date-fns/locale/pl";
 import CellActions from "./CellActions";
 import { Check, Cross } from "lucide-react";
-import { Product } from "@prisma/client";
+import { ProductWithChildren } from "@/types/types";
 
-export const columns: ColumnDef<Product>[] = [
+export const columns: ColumnDef<ProductWithChildren>[] = [
   {
     id: "select",
     header: ({ table }) => (

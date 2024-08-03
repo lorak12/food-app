@@ -162,3 +162,59 @@ export async function getOrderItemsByProductId(productId: string) {
   revalidatePath(`/`);
   return orderItems;
 }
+
+export async function createOrder(
+  data: z.infer<typeof schemas.Order>,
+  deliveryPrice: number
+) {
+  const { userId } = auth();
+  if (!userId) {
+    throw new Error("User must be authenticated to create an order");
+  }
+  const user = await prisma.user.findUnique({
+    where: { clerkUserId: userId },
+    include: {
+      orderItems: true,
+    },
+  });
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const totalPrice = user.orderItems.reduce(
+    (accumulator, currentValue) => accumulator + currentValue.price,
+    0
+  );
+
+  const parsedData = schemas.Order.parse(data);
+  const newOrder = await prisma.order.create({
+    data: {
+      status: "pending",
+      totalPrice: totalPrice + deliveryPrice,
+      user: {
+        connect: {
+          id: user.id,
+        },
+      },
+      address: {
+        connect: {
+          id: parsedData.addressId,
+        },
+      },
+      items: {
+        connect: [
+          ...user.orderItems.map((item) => {
+            return {
+              id: item.id,
+            };
+          }),
+        ],
+      },
+    },
+  });
+  await prisma.orderItem.deleteMany({
+    where: { userId: user.id },
+  });
+  revalidatePath(`/`);
+  return newOrder;
+}
